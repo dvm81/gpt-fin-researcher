@@ -1,0 +1,7 @@
+[project]
+name = "gpt-fin-researcher"
+version = "0.0.1"
+description = "LLM-powered agent that turns SEC filings into back-tested trading strategies"
+requires-python = ">=3.11"
+authors = [{ name = "Your Name" }]
+license = { text = "MIT" }   # change to "Apache-2.0" if you prefer
