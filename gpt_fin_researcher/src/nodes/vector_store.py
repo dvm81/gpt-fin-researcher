@@ -34,8 +34,7 @@ def store_in_chromadb(state: Dict[str, Any]) -> Dict[str, Any]:
     client = chromadb.PersistentClient(
         path=str(persist_dir),
         settings=Settings(
-            anonymized_telemetry=False,
-            allow_reset=True
+            anonymized_telemetry=False
         )
     )
     
@@ -105,7 +104,12 @@ def search_chromadb(query: str, n_results: int = 5, filters: Dict = None) -> Lis
         print("No ChromaDB database found")
         return []
     
-    client = chromadb.PersistentClient(path=str(persist_dir))
+    client = chromadb.PersistentClient(
+        path=str(persist_dir),
+        settings=Settings(
+            anonymized_telemetry=False
+        )
+    )
     
     try:
         collection = client.get_collection(name="sec_filings")
@@ -141,7 +145,12 @@ def get_collection_info() -> Dict[str, Any]:
     if not persist_dir.exists():
         return {"error": "No ChromaDB database found"}
     
-    client = chromadb.PersistentClient(path=str(persist_dir))
+    client = chromadb.PersistentClient(
+        path=str(persist_dir),
+        settings=Settings(
+            anonymized_telemetry=False
+        )
+    )
     
     try:
         collection = client.get_collection(name="sec_filings")

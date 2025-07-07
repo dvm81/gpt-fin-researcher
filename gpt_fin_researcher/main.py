@@ -10,6 +10,11 @@ import argparse
 import json
 from pprint import pprint
 
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 from src.graph import app
 
 
@@ -44,7 +49,28 @@ def main():
             if "chunks" in result:
                 print(f"🔍 Chunks created: {result.get('chunk_count', 0)}")
         
-        print(f"\n📄 Preview:")
+        # Show LLM analysis results
+        if "factors" in result and result["factors"]:
+            print(f"\n💡 Financial Analysis:")
+            print("-" * 40)
+            for i, factor in enumerate(result["factors"]):
+                print(f"\nAnalysis #{i+1}:")
+                print(f"  Sentiment: {factor.overall_sentiment.score:.2f}")
+                print(f"  Reasoning: {factor.overall_sentiment.reasoning}")
+                if factor.revenue_growth is not None:
+                    print(f"  Revenue Growth: {factor.revenue_growth}%")
+                print(f"  Guidance Raised: {factor.guidance_raised}")
+                print(f"  Margin Expansion: {factor.margin_expansion}")
+                print(f"  Debt Concerns: {factor.debt_concerns}")
+                
+                if factor.competitive_advantages:
+                    print(f"  Advantages: {', '.join(factor.competitive_advantages[:2])}")
+                if factor.risk_factors:
+                    print(f"  Top Risk: {factor.risk_factors[0]}")
+                if factor.growth_drivers:
+                    print(f"  Growth Driver: {factor.growth_drivers[0]}")
+        
+        print(f"\n📄 Filing Preview:")
         print("-" * 40)
         if result.get("docs"):
             preview = result["docs"][0].get("text", "")[:1000]
@@ -59,6 +85,18 @@ def main():
             print(f"✅ Successfully fetched {doc.get('filing_type')} for {doc.get('ticker')}")
             print(f"📄 Content: {len(doc.get('text', '')):,} characters")
             print(f"🔍 Chunks: {result.get('chunk_count', 0)}")
+            
+            # Show brief LLM analysis
+            if "factors" in result and result["factors"]:
+                factor = result["factors"][0]  # Show first analysis
+                print(f"\n💡 Key Insights:")
+                print(f"  Sentiment: {factor.overall_sentiment.score:.2f} - {factor.overall_sentiment.reasoning[:100]}...")
+                if factor.revenue_growth is not None:
+                    print(f"  Revenue Growth: {factor.revenue_growth}%")
+                if factor.competitive_advantages:
+                    print(f"  Key Advantage: {factor.competitive_advantages[0]}")
+                if factor.risk_factors:
+                    print(f"  Top Risk: {factor.risk_factors[0]}")
         else:
             print("❌ No filing data retrieved")
     

@@ -1,2 +1,5 @@
 chroma_db/
 sec-filings/
+.env
+.env.local
+.env.*.local

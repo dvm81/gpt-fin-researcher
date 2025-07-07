@@ -17,13 +17,11 @@ class FilingType(str, Enum):
     EIGHT_K = "8-K"
 
 
-class SentimentScore(str, Enum):
-    """Sentiment analysis scores."""
-    VERY_BULLISH = "very_bullish"
-    BULLISH = "bullish"
-    NEUTRAL = "neutral"
-    BEARISH = "bearish"
-    VERY_BEARISH = "very_bearish"
+class SentimentScore(BaseModel):
+    """Sentiment analysis score with confidence."""
+    score: float = Field(..., ge=-1.0, le=1.0, description="Sentiment score from -1 to 1")
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence in the sentiment")
+    reasoning: str = Field(..., description="Explanation for the sentiment score")
 
 
 class SECFiling(BaseModel):
@@ -38,33 +36,21 @@ class SECFiling(BaseModel):
 
 class FinancialFactors(BaseModel):
     """Extracted financial factors from SEC filings."""
-    ticker: str = Field(..., description="Stock ticker symbol")
-    filing_date: str = Field(..., description="Filing date in YYYY-MM-DD format")
-    
-    # Sentiment factors
+    # Core sentiment
     overall_sentiment: SentimentScore = Field(..., description="Overall document sentiment")
-    management_tone: SentimentScore = Field(..., description="Management discussion sentiment")
-    risk_sentiment: SentimentScore = Field(..., description="Risk factors sentiment")
     
     # Financial metrics
     revenue_growth: Optional[float] = Field(None, description="YoY revenue growth rate")
-    profit_margin: Optional[float] = Field(None, description="Net profit margin")
-    debt_to_equity: Optional[float] = Field(None, description="Debt to equity ratio")
-    free_cash_flow: Optional[float] = Field(None, description="Free cash flow in millions")
     
     # Guidance indicators
     guidance_raised: bool = Field(False, description="Whether guidance was raised")
-    guidance_lowered: bool = Field(False, description="Whether guidance was lowered")
-    guidance_maintained: bool = Field(False, description="Whether guidance was maintained")
+    margin_expansion: bool = Field(False, description="Whether margins are expanding")
+    debt_concerns: bool = Field(False, description="Whether there are debt concerns")
     
-    # Key themes extracted
-    key_themes: List[str] = Field(default_factory=list, description="Main themes discussed")
+    # Key insights
+    competitive_advantages: List[str] = Field(default_factory=list, description="Competitive advantages")
     risk_factors: List[str] = Field(default_factory=list, description="Key risk factors mentioned")
     growth_drivers: List[str] = Field(default_factory=list, description="Growth catalysts identified")
-    
-    # Confidence scores
-    extraction_confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence in extraction")
-    data_quality_score: float = Field(..., ge=0.0, le=1.0, description="Quality of source data")
 
 
 class TradingSignal(str, Enum):
