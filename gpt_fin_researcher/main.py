@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 """
 GPT-Fin-Researcher - Main Entry Point
