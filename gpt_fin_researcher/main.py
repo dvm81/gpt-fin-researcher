@@ -70,6 +70,20 @@ def main():
                 if factor.growth_drivers:
                     print(f"  Growth Driver: {factor.growth_drivers[0]}")
         
+        # Show generated strategies
+        if "strategies" in result and result["strategies"]:
+            print(f"\n🎯 Trading Strategies:")
+            print("-" * 40)
+            for i, strategy in enumerate(result["strategies"]):
+                print(f"\nStrategy #{i+1}: {strategy.name}")
+                print(f"  Description: {strategy.description}")
+                print(f"  Entry: {', '.join(strategy.entry_conditions[:2])}")
+                print(f"  Exit: {', '.join(strategy.exit_conditions[:2])}")
+                print(f"  Risk Management:")
+                print(f"    Stop Loss: {strategy.risk_management['stop_loss']*100}%")
+                print(f"    Take Profit: {strategy.risk_management['take_profit']*100}%")
+                print(f"    Max Position: {strategy.risk_management['max_position_size']*100}%")
+        
         print(f"\n📄 Filing Preview:")
         print("-" * 40)
         if result.get("docs"):
@@ -97,6 +111,13 @@ def main():
                     print(f"  Key Advantage: {factor.competitive_advantages[0]}")
                 if factor.risk_factors:
                     print(f"  Top Risk: {factor.risk_factors[0]}")
+            
+            # Show strategy summary
+            if "strategies" in result and result["strategies"]:
+                strategy = result["strategies"][0]
+                print(f"\n🎯 Trading Strategy: {strategy.name}")
+                print(f"  Entry: {strategy.entry_conditions[0] if strategy.entry_conditions else 'N/A'}")
+                print(f"  Stop Loss: {strategy.risk_management['stop_loss']*100}%")
         else:
             print("❌ No filing data retrieved")
     
