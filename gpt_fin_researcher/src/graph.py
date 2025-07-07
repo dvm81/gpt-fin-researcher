@@ -7,7 +7,10 @@ from typing import List, Optional, TypedDict
 
 from langgraph.graph import END, StateGraph
 
-from .nodes import sec_loader, chunk_and_embed, store_in_chromadb, analyze_financial_factors
+from .nodes import (
+    sec_loader, chunk_and_embed, store_in_chromadb, 
+    analyze_financial_factors, fetch_market_data
+)
 from .schemas import SECFiling, FinancialFactors, TradingStrategy, BacktestResults
 
 
@@ -32,6 +35,11 @@ class GraphState(TypedDict, total=False):
     
     # Vector store info
     vector_store: Optional[dict]
+    
+    # Market data
+    market_data: Optional[dict]
+    technical_indicators: Optional[dict]
+    market_context: Optional[dict]
 
 
 def planner(state: GraphState) -> GraphState:
@@ -48,13 +56,17 @@ g.add_node("planner", planner)
 g.add_node("sec_loader", sec_loader)
 g.add_node("embedder", chunk_and_embed)
 g.add_node("vector_store", store_in_chromadb)
+g.add_node("market_data", fetch_market_data)
 g.add_node("analyzer", analyze_financial_factors)
 
 g.set_entry_point("planner")
+
+# Sequential execution for now
 g.add_edge("planner", "sec_loader")
 g.add_edge("sec_loader", "embedder")
 g.add_edge("embedder", "vector_store")
-g.add_edge("vector_store", "analyzer")
+g.add_edge("vector_store", "market_data")
+g.add_edge("market_data", "analyzer")
 g.add_edge("analyzer", END)
 
 app = g.compile()

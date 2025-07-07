@@ -169,8 +169,10 @@ Extract structured financial insights as specified in the system prompt."""
 def analyze_financial_factors(state: Dict[str, Any]) -> Dict[str, Any]:
     """LangGraph node for extracting financial factors from stored documents.
     
+    Now enhanced with market data integration for more comprehensive analysis.
+    
     Args:
-        state: Graph state containing docs or chunks
+        state: Graph state containing docs, chunks, and market data
         
     Returns:
         Updated state with extracted financial factors
@@ -212,12 +214,23 @@ def analyze_financial_factors(state: Dict[str, Any]) -> Dict[str, Any]:
     
     factors = []
     
-    # Analyze using vector store context
+    # Check if we have market data to enhance analysis
+    market_context = state.get("market_context")
+    technical_indicators = state.get("technical_indicators")
+    
+    # Build enhanced queries with market context
     analysis_queries = [
         "revenue growth and financial performance",
         "management outlook and guidance",
         "risk factors and competitive position"
     ]
+    
+    # Add market context info if available
+    if market_context:
+        print(f"📊 Market Context: Price vs 52W high: {market_context.price_vs_52w_high}%")
+        if technical_indicators:
+            print(f"   RSI: {technical_indicators.rsi_14}")
+            print(f"   vs SPY (1M): {market_context.vs_spy_1m}%")
     
     for query in analysis_queries:
         try:

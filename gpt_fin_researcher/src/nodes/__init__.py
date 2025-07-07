@@ -4,6 +4,7 @@ from .sec_loader import sec_loader
 from .embedder import chunk_and_embed
 from .vector_store import store_in_chromadb, search_chromadb, get_collection_info
 from .llm_analyzer import analyze_financial_factors
+from .market_data import fetch_market_data
 
 __all__ = [
     "sec_loader", 
@@ -11,5 +12,6 @@ __all__ = [
     "store_in_chromadb", 
     "search_chromadb",
     "get_collection_info",
-    "analyze_financial_factors"
+    "analyze_financial_factors",
+    "fetch_market_data"
 ]
