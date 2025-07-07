@@ -79,3 +79,5 @@ xxhash==3.5.0
 yarl==1.20.1
 zstandard==0.23.0
 chromadb==0.4.24
+yfinance==0.2.28
+pandas==2.0.3
