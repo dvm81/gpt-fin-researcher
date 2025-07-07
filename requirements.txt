@@ -38,6 +38,7 @@ langgraph-prebuilt==0.5.2
 langgraph-sdk==0.1.72
 langsmith==0.4.4
 llama-index-core==0.12.46
+sec-edgar-downloader==5.0.3
 llama-index-instrumentation==0.2.0
 llama-index-workflows==1.0.1
 MarkupSafe==3.0.2
