@@ -16,6 +16,7 @@ import yfinance as yf
 from dotenv import load_dotenv
 
 from ..schemas import BacktestResults, TradingStrategy
+from ..visualization import BacktestVisualizer
 
 # Load environment variables
 load_dotenv()
@@ -312,6 +313,9 @@ def backtest_strategies(state: Dict[str, Any]) -> Dict[str, Any]:
     
     backtest_results = []
     
+    # Initialize visualizer
+    visualizer = BacktestVisualizer()
+    
     # Backtest each strategy
     for strategy in strategies:
         try:
@@ -349,8 +353,33 @@ def backtest_strategies(state: Dict[str, Any]) -> Dict[str, Any]:
                 backtester._get_error_results(strategy.strategy_id, str(e))
             )
     
+    # Create visualizations if we have results
+    charts_created = []
+    if backtest_results and ticker:
+        try:
+            # Create dashboard for all strategies
+            dashboard_path = visualizer.create_performance_dashboard(
+                backtest_results, strategies, ticker
+            )
+            if dashboard_path:
+                charts_created.append(dashboard_path)
+                print(f"\n📊 Performance dashboard created: {dashboard_path}")
+            
+            # Create individual charts for each strategy
+            for result, strategy in zip(backtest_results, strategies):
+                individual_chart = visualizer.create_individual_strategy_chart(
+                    result, strategy, ticker
+                )
+                if individual_chart:
+                    charts_created.append(individual_chart)
+                    print(f"📊 Individual chart created: {individual_chart}")
+                    
+        except Exception as e:
+            print(f"⚠️  Error creating visualizations: {e}")
+    
     return {
         **state,
         "backtest_results": backtest_results,
+        "visualization_charts": charts_created,
         "current_step": "backtesting_complete"
     }

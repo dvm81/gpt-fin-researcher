@@ -143,6 +143,12 @@ def main():
                     print(f"\n💰 Backtest Performance:")
                     print(f"  Return: {backtest.total_return}% | Sharpe: {backtest.sharpe_ratio}")
                     print(f"  Win Rate: {backtest.win_rate}% | Trades: {backtest.total_trades}")
+                    
+                    # Show visualization charts if available
+                    if "visualization_charts" in result and result["visualization_charts"]:
+                        print(f"\n📊 Visualization Charts:")
+                        for chart_path in result["visualization_charts"]:
+                            print(f"  📈 {chart_path}")
         else:
             print("❌ No filing data retrieved")
     

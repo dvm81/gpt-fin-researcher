@@ -24,9 +24,9 @@ def extract_text_from_filing(file_path: str) -> str:
         content = f.read()
     
     # If this is a full submission file, extract just the main document
-    if '<TYPE>10-K' in content or '<TYPE>10-Q' in content:
+    if '<TYPE>10-K' in content or '<TYPE>10-Q' in content or '<TYPE>20-F' in content:
         # Find the main document
-        doc_start = content.find('<TYPE>10-K') or content.find('<TYPE>10-Q')
+        doc_start = content.find('<TYPE>10-K') or content.find('<TYPE>10-Q') or content.find('<TYPE>20-F')
         if doc_start != -1:
             # Find the end of this document (next <TYPE> or end of file)
             doc_end = content.find('<TYPE>', doc_start + 10)
@@ -121,14 +121,27 @@ def sec_loader(state: Dict[str, Any]) -> Dict[str, Any]:
         filing_type = "10-K"  # Default to 10-K
         
         for part in parts:
-            if part.isupper() and len(part) <= 5 and part not in ["10-K", "10-Q", "8-K"]:
+            if part.isupper() and len(part) <= 5 and part not in ["10-K", "10-Q", "8-K", "20-F"]:
                 ticker = part
-            elif part in ["10-K", "10-Q", "8-K"]:
+            elif part in ["10-K", "10-Q", "8-K", "20-F"]:
                 filing_type = part
         
         if not ticker:
             print(f"No ticker found in task: {task}")
             continue
+        
+        # Auto-detect filing type for known foreign companies
+        foreign_companies = {
+            'SPOT': '20-F',  # Spotify (Luxembourg)
+            'ASML': '20-F',  # ASML (Netherlands)
+            'TSM': '20-F',   # Taiwan Semiconductor
+            'NVO': '20-F',   # Novo Nordisk
+            'SAP': '20-F',   # SAP (Germany)
+        }
+        
+        if filing_type == "10-K" and ticker in foreign_companies:
+            filing_type = foreign_companies[ticker]
+            print(f"Auto-detected {filing_type} for foreign company {ticker}")
         
         print(f"Fetching {filing_type} for {ticker}...")
         
@@ -141,12 +154,42 @@ def sec_loader(state: Dict[str, Any]) -> Dict[str, Any]:
         
         try:
             # Download latest filing
-            dl.get(
+            result = dl.get(
                 filing_type,
                 ticker,
                 limit=1,  # Get only the latest filing
                 download_details=True
             )
+            
+            # If no filings found and we tried 10-K, try 20-F (foreign companies)
+            if result == 0 and filing_type == "10-K":
+                print(f"No {filing_type} found for {ticker}, trying 20-F...")
+                result = dl.get(
+                    "20-F",
+                    ticker,
+                    limit=1,
+                    download_details=True
+                )
+                if result > 0:
+                    filing_type = "20-F"
+                    print(f"Found 20-F for {ticker}")
+            
+            # If still no filings found and we tried 20-F, try 10-K (domestic companies)
+            elif result == 0 and filing_type == "20-F":
+                print(f"No {filing_type} found for {ticker}, trying 10-K...")
+                result = dl.get(
+                    "10-K",
+                    ticker,
+                    limit=1,
+                    download_details=True
+                )
+                if result > 0:
+                    filing_type = "10-K"
+                    print(f"Found 10-K for {ticker}")
+            
+            if result == 0:
+                print(f"No filings found for {ticker}")
+                continue
             
             # Find the downloaded file
             company_dir = download_dir / f"sec-edgar-filings/{ticker}/{filing_type}"

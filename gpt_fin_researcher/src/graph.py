@@ -48,6 +48,9 @@ class GraphState(TypedDict, total=False):
     # Backtesting
     backtest_results: Optional[List[dict]]
     initial_capital: Optional[float]
+    
+    # Visualization
+    visualization_charts: Optional[List[str]]
 
 
 def planner(state: GraphState) -> GraphState:
