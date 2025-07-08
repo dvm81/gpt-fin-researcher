@@ -9,7 +9,8 @@ from langgraph.graph import END, StateGraph
 
 from .nodes import (
     sec_loader, chunk_and_embed, store_in_chromadb, 
-    analyze_financial_factors, fetch_market_data, generate_trading_strategy
+    analyze_financial_factors, fetch_market_data, generate_trading_strategy,
+    backtest_strategies
 )
 from .schemas import SECFiling, FinancialFactors, TradingStrategy, BacktestResults
 
@@ -43,6 +44,10 @@ class GraphState(TypedDict, total=False):
     
     # Strategy generation
     strategies: Optional[List[dict]]
+    
+    # Backtesting
+    backtest_results: Optional[List[dict]]
+    initial_capital: Optional[float]
 
 
 def planner(state: GraphState) -> GraphState:
@@ -62,6 +67,7 @@ g.add_node("vector_store", store_in_chromadb)
 g.add_node("market_data", fetch_market_data)
 g.add_node("analyzer", analyze_financial_factors)
 g.add_node("strategy_generator", generate_trading_strategy)
+g.add_node("backtester", backtest_strategies)
 
 g.set_entry_point("planner")
 
@@ -72,7 +78,8 @@ g.add_edge("embedder", "vector_store")
 g.add_edge("vector_store", "market_data")
 g.add_edge("market_data", "analyzer")
 g.add_edge("analyzer", "strategy_generator")
-g.add_edge("strategy_generator", END)
+g.add_edge("strategy_generator", "backtester")
+g.add_edge("backtester", END)
 
 app = g.compile()
 

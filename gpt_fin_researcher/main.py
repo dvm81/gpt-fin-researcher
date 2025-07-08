@@ -84,6 +84,24 @@ def main():
                 print(f"    Take Profit: {strategy.risk_management['take_profit']*100}%")
                 print(f"    Max Position: {strategy.risk_management['max_position_size']*100}%")
         
+        # Show backtest results
+        if "backtest_results" in result and result["backtest_results"]:
+            print(f"\n💰 Backtest Results:")
+            print("-" * 40)
+            for i, backtest in enumerate(result["backtest_results"]):
+                print(f"\nBacktest #{i+1}:")
+                print(f"  Total Return: {backtest.total_return}%")
+                print(f"  Annualized Return: {backtest.annualized_return}%")
+                print(f"  Sharpe Ratio: {backtest.sharpe_ratio}")
+                print(f"  Max Drawdown: {backtest.max_drawdown}%")
+                print(f"  Win Rate: {backtest.win_rate}%")
+                print(f"  Total Trades: {backtest.total_trades}")
+                
+                if backtest.total_return > 0:
+                    print("  ✅ Strategy is profitable!")
+                else:
+                    print("  ❌ Strategy is not profitable")
+        
         print(f"\n📄 Filing Preview:")
         print("-" * 40)
         if result.get("docs"):
@@ -118,6 +136,13 @@ def main():
                 print(f"\n🎯 Trading Strategy: {strategy.name}")
                 print(f"  Entry: {strategy.entry_conditions[0] if strategy.entry_conditions else 'N/A'}")
                 print(f"  Stop Loss: {strategy.risk_management['stop_loss']*100}%")
+                
+                # Show backtest summary
+                if "backtest_results" in result and result["backtest_results"]:
+                    backtest = result["backtest_results"][0]
+                    print(f"\n💰 Backtest Performance:")
+                    print(f"  Return: {backtest.total_return}% | Sharpe: {backtest.sharpe_ratio}")
+                    print(f"  Win Rate: {backtest.win_rate}% | Trades: {backtest.total_trades}")
         else:
             print("❌ No filing data retrieved")
     
